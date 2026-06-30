@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Tax Planner Search · Dilucci CPA — TSG Pipeline</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --ink: #1C1B19;
+    --ink-soft: #46433E;
+    --slate: #6B6864;
+    --line: #E3E0D9;
+    --line-soft: #EFEDE7;
+    --surface: #F4F3EF;
+    --card: #FFFFFF;
+    --orange: #ED852F;
+    --orange-deep: #C96A1E;
+    --orange-tint: #FBEADA;
+    --green: #3F7D5A;
+    --green-tint: #E4F0E9;
+    --red: #B23B33;
+    --red-tint: #F6E3E1;
+    --radius: 10px;
+    --radius-sm: 7px;
+    --shadow: 0 1px 2px rgba(28,27,25,.05), 0 6px 18px rgba(28,27,25,.06);
+    --shadow-lg: 0 12px 40px rgba(28,27,25,.18);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--surface);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.45;
+  }
+  h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; margin: 0; letter-spacing: -.01em; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+
+  /* ---------- Header ---------- */
+  header {
+    background: var(--ink);
+    color: #F4F3EF;
+    padding: 18px 28px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex-wrap: wrap;
+  }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand-mark {
+    width: 38px; height: 38px; border-radius: 8px;
+    background: var(--orange);
+    display: grid; place-items: center;
+    font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 19px;
+    color: var(--ink);
+    flex-shrink: 0;
+  }
+  .brand-text .name { font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 15px; letter-spacing: .02em; }
+  .brand-text .sub { font-size: 11px; color: #A8A39A; letter-spacing: .08em; text-transform: uppercase; }
+  .engagement {
+    border-left: 1px solid #3A3833;
+    padding-left: 18px;
+    margin-left: 4px;
+  }
+  .engagement .role { font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 16px; }
+  .engagement .meta { font-size: 12px; color: #A8A39A; }
+  .engagement .meta b { color: var(--orange); font-weight: 600; }
+  .header-actions { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; }
+
+  button { font-family: 'Inter', sans-serif; cursor: pointer; border: none; font-size: 13px; }
+  .btn {
+    padding: 9px 15px; border-radius: var(--radius-sm); font-weight: 600;
+    display: inline-flex; align-items: center; gap: 7px; transition: all .14s ease; white-space: nowrap;
+  }
+  .btn-primary { background: var(--orange); color: var(--ink); }
+  .btn-primary:hover { background: var(--orange-deep); color: #fff; }
+  .btn-ghost { background: #2B2926; color: #E3E0D9; }
+  .btn-ghost:hover { background: #38352F; }
+  .btn-line { background: var(--card); color: var(--ink-soft); border: 1px solid var(--line); }
+  .btn-line:hover { border-color: var(--slate); color: var(--ink); }
+
+  main { max-width: 1240px; margin: 0 auto; padding: 26px 28px 80px; }
+
+  /* ---------- Metric tiles ---------- */
+  .tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 26px; }
+  .tile { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; box-shadow: var(--shadow); }
+  .tile .label { font-size: 11px; text-transform: uppercase; letter-spacing: .07em; color: var(--slate); font-weight: 600; }
+  .tile .value { font-family: 'Space Grotesk', sans-serif; font-size: 32px; font-weight: 600; line-height: 1.1; margin-top: 4px; }
+  .tile .value small { font-size: 14px; color: var(--slate); font-weight: 500; }
+  .tile.accent { background: var(--ink); border-color: var(--ink); }
+  .tile.accent .label { color: #A8A39A; }
+  .tile.accent .value { color: var(--orange); }
+
+  /* ---------- Funnel (signature element) ---------- */
+  .panel { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 22px; }
+  .panel-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--line-soft); }
+  .panel-head h2 { font-size: 15px; font-weight: 600; }
+  .panel-head .hint { font-size: 12px; color: var(--slate); }
+
+  .funnel { display: flex; gap: 6px; padding: 18px 20px; overflow-x: auto; }
+  .stage {
+    flex: 1 1 0; min-width: 116px; position: relative;
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--radius-sm); padding: 13px 13px 12px;
+    cursor: pointer; transition: all .14s ease;
+  }
+  .stage:hover { border-color: var(--slate); transform: translateY(-1px); }
+  .stage.active { border-color: var(--orange); background: var(--orange-tint); box-shadow: 0 0 0 1px var(--orange); }
+  .stage .st-name { font-size: 11.5px; font-weight: 600; color: var(--ink-soft); letter-spacing: .01em; line-height: 1.25; min-height: 28px; }
+  .stage .st-count { font-family: 'Space Grotesk', sans-serif; font-size: 28px; font-weight: 600; line-height: 1; margin-top: 6px; }
+  .stage .st-conv { font-size: 10.5px; color: var(--slate); margin-top: 3px; font-family: 'JetBrains Mono', monospace; }
+  .stage .st-bar { height: 3px; border-radius: 2px; background: var(--line); margin-top: 9px; overflow: hidden; }
+  .stage .st-bar i { display: block; height: 100%; background: var(--orange); border-radius: 2px; }
+  .stage.terminal .st-count { color: var(--green); }
+  .stage.terminal .st-bar i { background: var(--green); }
+
+  /* ---------- Toolbar ---------- */
+  .toolbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
+  .search { flex: 1 1 240px; position: relative; }
+  .search input {
+    width: 100%; padding: 9px 12px 9px 34px; border: 1px solid var(--line); border-radius: var(--radius-sm);
+    font-size: 13px; font-family: inherit; background: var(--card); color: var(--ink);
+  }
+  .search input:focus { outline: none; border-color: var(--orange); }
+  .search svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--slate); }
+  select.filter {
+    padding: 9px 12px; border: 1px solid var(--line); border-radius: var(--radius-sm);
+    font-size: 13px; font-family: inherit; background: var(--card); color: var(--ink-soft); cursor: pointer;
+  }
+  .filter-tag {
+    display: inline-flex; align-items: center; gap: 6px; background: var(--orange-tint);
+    color: var(--orange-deep); border: 1px solid var(--orange); border-radius: 20px;
+    padding: 5px 8px 5px 12px; font-size: 12px; font-weight: 600;
+  }
+  .filter-tag button { background: none; color: var(--orange-deep); font-size: 15px; line-height: 1; padding: 0 2px; }
+
+  /* ---------- Table ---------- */
+  .table-wrap { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    text-align: left; font-size: 10.5px; text-transform: uppercase; letter-spacing: .06em;
+    color: var(--slate); font-weight: 600; padding: 11px 16px; border-bottom: 1px solid var(--line);
+    background: var(--surface);
+  }
+  tbody td { padding: 13px 16px; border-bottom: 1px solid var(--line-soft); font-size: 13px; vertical-align: middle; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr { transition: background .1s ease; }
+  tbody tr:hover { background: #FBFAF7; }
+  .cand-name { font-weight: 600; color: var(--ink); cursor: pointer; }
+  .cand-name:hover { color: var(--orange-deep); }
+  .cand-sub { font-size: 11.5px; color: var(--slate); margin-top: 1px; }
+  .cand-creds { display: inline-block; font-size: 10px; font-weight: 600; color: var(--ink-soft); background: var(--line-soft); border-radius: 4px; padding: 1px 5px; margin-top: 4px; margin-right: 4px; }
+
+  select.stage-select {
+    font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; border-radius: 20px;
+    padding: 5px 10px; border: 1px solid var(--line); cursor: pointer; background: var(--card); color: var(--ink-soft);
+  }
+  select.stage-select:focus { outline: none; border-color: var(--orange); }
+
+  .source-chip { font-size: 11.5px; color: var(--ink-soft); }
+  .next-action { font-size: 12px; color: var(--ink-soft); }
+  .next-action.empty { color: #B8B4AC; font-style: italic; }
+  .date-cell { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--slate); }
+  .row-actions { display: flex; gap: 4px; justify-content: flex-end; }
+  .icon-btn { width: 28px; height: 28px; border-radius: 6px; background: transparent; color: var(--slate); display: grid; place-items: center; }
+  .icon-btn:hover { background: var(--line-soft); color: var(--ink); }
+  .icon-btn.danger:hover { background: var(--red-tint); color: var(--red); }
+
+  .empty-state { padding: 60px 20px; text-align: center; color: var(--slate); }
+  .empty-state h3 { font-size: 17px; color: var(--ink-soft); margin-bottom: 6px; }
+  .empty-state p { font-size: 13px; margin-bottom: 18px; }
+
+  /* ---------- Modal ---------- */
+  .overlay { position: fixed; inset: 0; background: rgba(28,27,25,.42); display: none; align-items: flex-start; justify-content: center; padding: 40px 16px; overflow-y: auto; z-index: 50; }
+  .overlay.open { display: flex; }
+  .modal { background: var(--card); border-radius: 12px; width: 100%; max-width: 640px; box-shadow: var(--shadow-lg); }
+  .modal-head { padding: 20px 24px; border-bottom: 1px solid var(--line-soft); display: flex; align-items: center; justify-content: space-between; }
+  .modal-head h3 { font-size: 17px; }
+  .modal-body { padding: 22px 24px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--slate); font-weight: 600; margin-bottom: 5px; }
+  .field input, .field select, .field textarea {
+    width: 100%; padding: 9px 11px; border: 1px solid var(--line); border-radius: var(--radius-sm);
+    font-size: 13px; font-family: inherit; color: var(--ink); background: var(--card);
+  }
+  .field textarea { resize: vertical; min-height: 64px; }
+  .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--orange); }
+  .modal-foot { padding: 16px 24px; border-top: 1px solid var(--line-soft); display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+
+  .star-row { display: flex; gap: 3px; }
+  .star { font-size: 20px; color: var(--line); cursor: pointer; line-height: 1; }
+  .star.on { color: var(--orange); }
+
+  input[type="file"] { display: none; }
+
+  .resume-empty { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .resume-card { display: flex; align-items: center; gap: 11px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 10px 12px; }
+  .resume-card .doc { color: var(--orange-deep); flex-shrink: 0; }
+  .resume-card .grow { flex: 1; min-width: 0; }
+  .resume-card .fname { font-size: 12.5px; font-weight: 600; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .resume-card .fmeta { font-size: 11px; color: var(--slate); }
+  .mini-btn { font-size: 12px; font-weight: 600; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--line); background: var(--card); color: var(--ink-soft); }
+  .mini-btn:hover { border-color: var(--slate); color: var(--ink); }
+  .mini-btn.red:hover { border-color: var(--red); color: var(--red); background: var(--red-tint); }
+  .cell-links { display: inline-flex; gap: 5px; margin-left: 4px; vertical-align: middle; }
+  .cell-links a, .cell-links button.lk { width: 21px; height: 21px; border-radius: 5px; display: inline-grid; place-items: center; background: var(--line-soft); color: var(--slate); border: none; cursor: pointer; padding: 0; }
+  .cell-links a:hover, .cell-links button.lk:hover { background: var(--orange-tint); color: var(--orange-deep); }
+
+  footer { text-align: center; font-size: 11.5px; color: var(--slate); padding: 24px; }
+  footer .mono { color: var(--ink-soft); }
+
+  @media (max-width: 880px) {
+    .tiles { grid-template-columns: repeat(2, 1fr); }
+    .engagement { border-left: none; padding-left: 0; margin-left: 0; }
+    .grid2 { grid-template-columns: 1fr; }
+    thead { display: none; }
+    tbody td { display: block; border-bottom: none; padding: 6px 16px; }
+    tbody tr { display: block; border-bottom: 1px solid var(--line); padding: 8px 0; }
+    .row-actions { justify-content: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="brand-mark">T</div>
+    <div class="brand-text">
+      <div class="name">TSG EXECUTIVE SEARCH</div>
+      <div class="sub">Candidate Pipeline</div>
+    </div>
+  </div>
+  <div class="engagement">
+    <div class="role" id="engRole">Tax Planner</div>
+    <div class="meta">Client: <b id="engClient">Dilucci CPA</b> · <span id="engLoc">Dallas, TX</span> · Contact: <span id="engContact">Jasmine</span></div>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-primary" onclick="openModal()">＋ Add candidate</button>
+    <button class="btn btn-ghost" onclick="exportCSV()">Export CSV</button>
+    <button class="btn btn-ghost" onclick="exportJSON()">Backup</button>
+    <button class="btn btn-ghost" onclick="document.getElementById('importFile').click()">Restore</button>
+    <input type="file" id="importFile" accept="application/json" onchange="importJSON(event)" />
+  </div>
+</header>
+
+<main>
+  <div class="tiles" id="tiles"></div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <h2>Pipeline</h2>
+      <span class="hint">Click a stage to filter · conversion shown vs. sourced</span>
+    </div>
+    <div class="funnel" id="funnel"></div>
+  </div>
+
+  <div class="toolbar">
+    <div class="search">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input id="searchInput" type="text" placeholder="Search name, company, notes…" oninput="render()" />
+    </div>
+    <select class="filter" id="sourceFilter" onchange="render()">
+      <option value="">All sources</option>
+    </select>
+    <span id="stageFilterTag"></span>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:30%">Candidate</th>
+          <th style="width:18%">Stage</th>
+          <th style="width:11%">Source</th>
+          <th style="width:14%">Next action</th>
+          <th style="width:11%">Last contact</th>
+          <th style="width:8%">Comp</th>
+          <th style="width:8%"></th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <div id="emptyState"></div>
+  </div>
+</main>
+
+<!-- Modal -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="modalTitle">Add candidate</h3>
+      <button class="icon-btn" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="f_id" />
+      <div class="grid2">
+        <div class="field"><label>Full name *</label><input id="f_name" placeholder="Jane Doe" /></div>
+        <div class="field"><label>Current title</label><input id="f_title" placeholder="Senior Tax Associate" /></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label>Current company</label><input id="f_company" placeholder="Firm name" /></div>
+        <div class="field"><label>Location</label><input id="f_location" placeholder="Dallas, TX" /></div>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label>Stage</label>
+          <select id="f_stage"></select>
+        </div>
+        <div class="field">
+          <label>Source</label>
+          <select id="f_source">
+            <option>LinkedIn</option><option>Apollo</option><option>Referral</option>
+            <option>Inbound</option><option>Job board</option><option>Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label>Email</label><input id="f_email" placeholder="name@email.com" /></div>
+        <div class="field"><label>Phone</label><input id="f_phone" placeholder="(555) 000-0000" /></div>
+      </div>
+      <div class="field"><label>LinkedIn profile URL</label><input id="f_linkedin" placeholder="https://www.linkedin.com/in/…" /></div>
+      <div class="grid2">
+        <div class="field"><label>Credentials</label><input id="f_creds" placeholder="CPA, EA, MST…" /></div>
+        <div class="field"><label>Comp expectation</label><input id="f_comp" placeholder="$120K" /></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label>Years experience</label><input id="f_years" placeholder="8" /></div>
+        <div class="field"><label>Last contact date</label><input id="f_lastcontact" type="date" /></div>
+      </div>
+      <div class="field"><label>Next action / next step</label><input id="f_next" placeholder="Schedule screen · awaiting reply · send to Jasmine…" /></div>
+      <div class="field"><label>Notes (tax software, fit, screen takeaways)</label><textarea id="f_notes" placeholder="Lacerte + UltraTax, strong on partnership returns, open to relocating…"></textarea></div>
+      <div class="field">
+        <label>Résumé</label>
+        <div id="resumeArea"></div>
+        <input type="file" id="resumeInput" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onchange="handleResumeFile(event)" />
+      </div>
+      <div class="field">
+        <label>Fit rating</label>
+        <div class="star-row" id="starRow"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-line danger-text" id="deleteBtn" onclick="deleteCurrent()" style="color:var(--red);display:none;">Delete</button>
+      <div style="margin-left:auto;display:flex;gap:8px;">
+        <button class="btn btn-line" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveCandidate()">Save candidate</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  TSG Executive Search &amp; Compensation Consulting · <span class="mono">data stored locally in this browser — use Backup regularly</span>
+</footer>
+
+<script>
+  const KEY = 'tsg_dilucci_taxplanner_v1';
+  const STAGES = ['Sourced','Reached Out','Spoke With','Submitted to Jasmine','Client Interview','Offer','Hired'];
+  const TERMINAL = 'Hired';
+  const PASSED = 'Passed / Declined';
+  const ALL_STAGES = [...STAGES, PASSED];
+
+  let state = load();
+  let editRating = 0;
+  let editResume = null;
+
+  function load() {
+    try {
+      const raw = localStorage.getItem(KEY);
+      if (raw) return JSON.parse(raw);
+    } catch (e) {}
+    return {
+      engagement: { role: 'Tax Planner', client: 'Dilucci CPA', location: 'Dallas, TX', contact: 'Jasmine' },
+      candidates: []
+    };
+  }
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(state)); return true; }
+    catch (e) {
+      if (e && (e.name === 'QuotaExceededError' || /quota/i.test(e.message || ''))) {
+        alert('This browser\u2019s local storage is full \u2014 usually from attached r\u00e9sum\u00e9s. Remove a r\u00e9sum\u00e9 (or keep it as a link in Notes) and try again. Your latest change was not saved.');
+      } else {
+        alert('Could not save locally. If you opened this file directly, host it on GitHub Pages so storage works.');
+      }
+      return false;
+    }
+  }
+  function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+  function esc(s) { return (s || '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+  // ---------- Filters ----------
+  let activeStage = '';
+  function setStageFilter(st) { activeStage = (activeStage === st) ? '' : st; render(); }
+
+  function filtered() {
+    const q = (document.getElementById('searchInput').value || '').toLowerCase();
+    const src = document.getElementById('sourceFilter').value;
+    return state.candidates.filter(c => {
+      if (activeStage && c.stage !== activeStage) return false;
+      if (src && c.source !== src) return false;
+      if (q) {
+        const hay = [c.name, c.company, c.title, c.notes, c.next, c.creds].join(' ').toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    });
+  }
+
+  // ---------- Render ----------
+  function render() {
+    renderTiles();
+    renderFunnel();
+    renderSourceFilter();
+    renderStageTag();
+    renderTable();
+    document.getElementById('engRole').textContent = state.engagement.role;
+    document.getElementById('engClient').textContent = state.engagement.client;
+    document.getElementById('engLoc').textContent = state.engagement.location;
+    document.getElementById('engContact').textContent = state.engagement.contact;
+  }
+
+  function countAt(stage) { return state.candidates.filter(c => c.stage === stage).length; }
+  function activeCount() { return state.candidates.filter(c => c.stage !== PASSED && c.stage !== TERMINAL).length; }
+
+  function renderTiles() {
+    const total = state.candidates.length;
+    const submitted = state.candidates.filter(c => ['Submitted to Jasmine','Client Interview','Offer','Hired'].includes(c.stage)).length;
+    const hired = countAt('Hired');
+    const tiles = [
+      { label: 'Total candidates', value: total },
+      { label: 'Active in pipeline', value: activeCount() },
+      { label: 'Submitted to client', value: submitted },
+      { label: 'Hired', value: hired, accent: true }
+    ];
+    document.getElementById('tiles').innerHTML = tiles.map(t =>
+      `<div class="tile ${t.accent ? 'accent' : ''}"><div class="label">${t.label}</div><div class="value">${t.value}</div></div>`
+    ).join('');
+  }
+
+  function renderFunnel() {
+    const sourced = Math.max(state.candidates.filter(c => c.stage !== PASSED).length, 1);
+    // candidates that reached at least each stage = those currently at that stage or further along
+    const order = STAGES;
+    function reached(idx) {
+      return state.candidates.filter(c => {
+        const ci = order.indexOf(c.stage);
+        return ci >= idx; // at this stage or beyond
+      }).length;
+    }
+    const html = STAGES.map((st, i) => {
+      const reachedN = reached(i);
+      const conv = Math.round((reachedN / sourced) * 100);
+      const isTerminal = st === TERMINAL;
+      return `<div class="stage ${activeStage === st ? 'active' : ''} ${isTerminal ? 'terminal' : ''}" onclick="setStageFilter('${st}')">
+        <div class="st-name">${st}</div>
+        <div class="st-count">${reachedN}</div>
+        <div class="st-conv">${conv}%${i > 0 ? ' reached' : ''}</div>
+        <div class="st-bar"><i style="width:${conv}%"></i></div>
+      </div>`;
+    }).join('');
+    document.getElementById('funnel').innerHTML = html;
+  }
+
+  function renderSourceFilter() {
+    const sel = document.getElementById('sourceFilter');
+    const cur = sel.value;
+    const sources = [...new Set(state.candidates.map(c => c.source).filter(Boolean))].sort();
+    sel.innerHTML = '<option value="">All sources</option>' + sources.map(s => `<option ${s === cur ? 'selected' : ''}>${esc(s)}</option>`).join('');
+  }
+
+  function renderStageTag() {
+    const el = document.getElementById('stageFilterTag');
+    el.innerHTML = activeStage
+      ? `<span class="filter-tag">${esc(activeStage)} <button onclick="setStageFilter('${activeStage}')">✕</button></span>`
+      : '';
+  }
+
+  function stageOptions(selected) {
+    return ALL_STAGES.map(s => `<option ${s === selected ? 'selected' : ''}>${s}</option>`).join('');
+  }
+
+  function renderTable() {
+    const rows = filtered().sort((a, b) => ALL_STAGES.indexOf(b.stage) - ALL_STAGES.indexOf(a.stage));
+    const tbody = document.getElementById('tbody');
+    const empty = document.getElementById('emptyState');
+    if (state.candidates.length === 0) {
+      tbody.innerHTML = '';
+      empty.innerHTML = `<div class="empty-state"><h3>No candidates yet</h3><p>Add the people you're sourcing for the Dilucci CPA Tax Planner search.</p><button class="btn btn-primary" onclick="openModal()" style="display:inline-flex">＋ Add your first candidate</button></div>`;
+      return;
+    }
+    if (rows.length === 0) {
+      tbody.innerHTML = '';
+      empty.innerHTML = `<div class="empty-state"><p>No candidates match the current filters.</p></div>`;
+      return;
+    }
+    empty.innerHTML = '';
+    tbody.innerHTML = rows.map(c => {
+      const creds = (c.creds ? c.creds.split(',').map(x => x.trim()).filter(Boolean) : []).map(x => `<span class="cand-creds">${esc(x)}</span>`).join('');
+      const sub = [c.title, c.company].filter(Boolean).join(' · ');
+      const stars = c.rating ? '★'.repeat(c.rating) : '';
+      const links = [];
+      if (c.linkedin) links.push(`<a href="${esc(c.linkedin)}" target="_blank" rel="noopener" title="Open LinkedIn profile" onclick="event.stopPropagation()"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.32 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.79M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77Z"/></svg></a>`);
+      if (c.resume) links.push(`<button class="lk" title="View résumé: ${esc(c.resume.name)}" onclick="event.stopPropagation();viewResume('${c.id}')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></button>`);
+      const linksHtml = links.length ? `<span class="cell-links">${links.join('')}</span>` : '';
+      return `<tr>
+        <td>
+          <div style="display:flex;align-items:center;gap:2px;flex-wrap:wrap;">
+            <span class="cand-name" onclick="openModal('${c.id}')">${esc(c.name)} ${stars ? `<span style="color:var(--orange);font-size:11px;">${stars}</span>` : ''}</span>
+            ${linksHtml}
+          </div>
+          ${sub ? `<div class="cand-sub">${esc(sub)}</div>` : ''}
+          ${creds}
+        </td>
+        <td><select class="stage-select" onchange="quickStage('${c.id}', this.value)">${stageOptions(c.stage)}</select></td>
+        <td><span class="source-chip">${esc(c.source || '—')}</span></td>
+        <td><span class="next-action ${c.next ? '' : 'empty'}">${esc(c.next || 'Set next step')}</span></td>
+        <td><span class="date-cell">${c.lastContact || '—'}</span></td>
+        <td><span class="mono" style="font-size:12px;">${esc(c.comp || '—')}</span></td>
+        <td><div class="row-actions">
+          <button class="icon-btn" title="Edit" onclick="openModal('${c.id}')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button>
+          <button class="icon-btn danger" title="Delete" onclick="deleteCandidate('${c.id}')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg></button>
+        </div></td>
+      </tr>`;
+    }).join('');
+  }
+
+  function quickStage(id, val) {
+    const c = state.candidates.find(x => x.id === id);
+    if (c) { c.stage = val; save(); render(); }
+  }
+
+  // ---------- Modal ----------
+  function setStars(n) { editRating = n; document.querySelectorAll('#starRow .star').forEach((s, i) => s.classList.toggle('on', i < n)); }
+  function buildStars() {
+    const row = document.getElementById('starRow');
+    row.innerHTML = [1,2,3,4,5].map(i => `<span class="star" onclick="setStars(${i})">★</span>`).join('') + ` <span class="star" style="color:var(--slate);font-size:12px;margin-left:8px;" onclick="setStars(0)">clear</span>`;
+  }
+
+  function openModal(id) {
+    document.getElementById('f_stage').innerHTML = stageOptions('Sourced');
+    buildStars();
+    if (id) {
+      const c = state.candidates.find(x => x.id === id);
+      document.getElementById('modalTitle').textContent = 'Edit candidate';
+      document.getElementById('deleteBtn').style.display = 'inline-flex';
+      document.getElementById('f_id').value = c.id;
+      document.getElementById('f_name').value = c.name || '';
+      document.getElementById('f_title').value = c.title || '';
+      document.getElementById('f_company').value = c.company || '';
+      document.getElementById('f_location').value = c.location || '';
+      document.getElementById('f_stage').innerHTML = stageOptions(c.stage);
+      document.getElementById('f_source').value = c.source || 'LinkedIn';
+      document.getElementById('f_email').value = c.email || '';
+      document.getElementById('f_phone').value = c.phone || '';
+      document.getElementById('f_linkedin').value = c.linkedin || '';
+      document.getElementById('f_creds').value = c.creds || '';
+      document.getElementById('f_comp').value = c.comp || '';
+      document.getElementById('f_years').value = c.years || '';
+      document.getElementById('f_lastcontact').value = c.lastContact || '';
+      document.getElementById('f_next').value = c.next || '';
+      document.getElementById('f_notes').value = c.notes || '';
+      setStars(c.rating || 0);
+      editResume = c.resume || null;
+    } else {
+      document.getElementById('modalTitle').textContent = 'Add candidate';
+      document.getElementById('deleteBtn').style.display = 'none';
+      ['f_id','f_name','f_title','f_company','f_email','f_phone','f_linkedin','f_creds','f_comp','f_years','f_lastcontact','f_next','f_notes'].forEach(i => document.getElementById(i).value = '');
+      document.getElementById('f_location').value = 'Dallas, TX';
+      document.getElementById('f_source').value = 'LinkedIn';
+      setStars(0);
+      editResume = null;
+    }
+    renderResumeField();
+    document.getElementById('overlay').classList.add('open');
+  }
+  function closeModal() { document.getElementById('overlay').classList.remove('open'); }
+
+  function saveCandidate() {
+    const name = document.getElementById('f_name').value.trim();
+    if (!name) { alert('Candidate name is required.'); return; }
+    const id = document.getElementById('f_id').value;
+    const data = {
+      name,
+      title: document.getElementById('f_title').value.trim(),
+      company: document.getElementById('f_company').value.trim(),
+      location: document.getElementById('f_location').value.trim(),
+      stage: document.getElementById('f_stage').value,
+      source: document.getElementById('f_source').value,
+      email: document.getElementById('f_email').value.trim(),
+      phone: document.getElementById('f_phone').value.trim(),
+      linkedin: document.getElementById('f_linkedin').value.trim(),
+      creds: document.getElementById('f_creds').value.trim(),
+      comp: document.getElementById('f_comp').value.trim(),
+      years: document.getElementById('f_years').value.trim(),
+      lastContact: document.getElementById('f_lastcontact').value,
+      next: document.getElementById('f_next').value.trim(),
+      notes: document.getElementById('f_notes').value.trim(),
+      rating: editRating,
+      resume: editResume
+    };
+    if (id) {
+      const c = state.candidates.find(x => x.id === id);
+      const prev = JSON.stringify(c);
+      Object.assign(c, data);
+      if (!save()) { Object.assign(c, JSON.parse(prev)); render(); return; }
+    } else {
+      data.id = uid();
+      data.added = today();
+      state.candidates.push(data);
+      if (!save()) { state.candidates.pop(); render(); return; }
+    }
+    render(); closeModal();
+  }
+
+  function deleteCurrent() {
+    const id = document.getElementById('f_id').value;
+    if (id) deleteCandidate(id, true);
+    closeModal();
+  }
+  function deleteCandidate(id, skipConfirm) {
+    const c = state.candidates.find(x => x.id === id);
+    if (!c) return;
+    if (!skipConfirm && !confirm(`Remove ${c.name} from the pipeline?`)) return;
+    state.candidates = state.candidates.filter(x => x.id !== id);
+    save(); render();
+  }
+
+  // ---------- Résumé attachment ----------
+  function fmtSize(b) { return b < 1024 ? b + ' B' : b < 1048576 ? (b / 1024).toFixed(0) + ' KB' : (b / 1048576).toFixed(1) + ' MB'; }
+  const DOC_ICON = '<svg class="doc" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h6"/></svg>';
+
+  function handleResumeFile(e) {
+    const file = e.target.files[0]; if (!file) return;
+    const MAX = 2 * 1024 * 1024;
+    if (file.size > MAX) {
+      alert('That file is ' + fmtSize(file.size) + '. Please keep r\u00e9sum\u00e9s under 2 MB \u2014 compress the PDF, or paste a Drive/Dropbox link in Notes instead.');
+      e.target.value = ''; return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => { editResume = { name: file.name, type: file.type, size: file.size, data: reader.result }; renderResumeField(); };
+    reader.onerror = () => alert('Could not read that file.');
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  }
+  function removeResume() { editResume = null; renderResumeField(); }
+  function renderResumeField() {
+    const a = document.getElementById('resumeArea');
+    if (!a) return;
+    if (editResume) {
+      a.innerHTML = `<div class="resume-card">${DOC_ICON}
+        <div class="grow"><div class="fname">${esc(editResume.name)}</div><div class="fmeta">${fmtSize(editResume.size || 0)}</div></div>
+        <button class="mini-btn" onclick="openResume(editResume)">View</button>
+        <button class="mini-btn red" onclick="removeResume()">Remove</button></div>`;
+    } else {
+      a.innerHTML = `<div class="resume-empty"><button class="mini-btn" onclick="document.getElementById('resumeInput').click()">＋ Attach résumé (PDF or Word)</button><span class="fmeta">stored with the candidate · max 2 MB</span></div>`;
+    }
+  }
+  function dataURLtoBlob(dataurl) {
+    const parts = dataurl.split(','); const mime = (parts[0].match(/:(.*?);/) || [])[1] || 'application/octet-stream';
+    const bin = atob(parts[1]); const len = bin.length; const arr = new Uint8Array(len);
+    for (let i = 0; i < len; i++) arr[i] = bin.charCodeAt(i);
+    return new Blob([arr], { type: mime });
+  }
+  function openResume(r) {
+    if (!r || !r.data) return;
+    try {
+      const url = URL.createObjectURL(dataURLtoBlob(r.data));
+      const w = window.open(url, '_blank');
+      if (!w) { const a = document.createElement('a'); a.href = url; a.download = r.name || 'resume'; document.body.appendChild(a); a.click(); a.remove(); }
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
+    } catch (e) { alert('Could not open this résumé.'); }
+  }
+  function viewResume(id) { const c = state.candidates.find(x => x.id === id); if (c) openResume(c.resume); }
+
+  // ---------- Import / Export ----------
+  function exportJSON() {
+    const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+    downloadBlob(blob, `tsg-dilucci-taxplanner-backup-${today()}.json`);
+  }
+  function importJSON(e) {
+    const file = e.target.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(reader.result);
+        if (!data.candidates) throw new Error('bad file');
+        if (confirm(`Restore ${data.candidates.length} candidate(s)? This replaces the current list.`)) {
+          state = data; save(); render();
+        }
+      } catch (err) { alert('That file could not be read as a valid backup.'); }
+      e.target.value = '';
+    };
+    reader.readAsText(file);
+  }
+  function exportCSV() {
+    const cols = ['name','title','company','location','stage','source','email','phone','linkedin','creds','comp','years','lastContact','next','rating','notes'];
+    const head = ['Name','Title','Company','Location','Stage','Source','Email','Phone','LinkedIn','Credentials','Comp','Years','Last Contact','Next Action','Rating','Notes','Résumé'];
+    const rows = state.candidates.map(c => [...cols.map(k => csvCell(c[k])), csvCell(c.resume ? c.resume.name : '')].join(','));
+    const csv = [head.join(','), ...rows].join('\r\n');
+    downloadBlob(new Blob([csv], { type: 'text/csv' }), `tsg-dilucci-taxplanner-${today()}.csv`);
+  }
+  function csvCell(v) { v = (v == null ? '' : String(v)); return /[",\r\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
+  function today() { return new Date().toISOString().slice(0, 10); }
+  function downloadBlob(blob, name) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  }
+
+  document.getElementById('overlay').addEventListener('click', e => { if (e.target.id === 'overlay') closeModal(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+  render();
+</script>
+</body>
+</html>
